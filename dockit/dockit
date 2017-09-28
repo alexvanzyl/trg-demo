@@ -1,0 +1,55 @@
+#!/bin/bash
+
+# Define the compose file to use.
+COMPOSE="docker-compose -f docker-compose.yml"
+
+# Run composer command in the php container.
+function npm()
+{
+    shift
+    $COMPOSE run --rm $TTY \
+        -u 1000:1000 \
+        -w /var/www/html \
+        node \
+        npm $@
+
+    exit
+}
+
+# Run Vue CLI commands
+function vue()
+{   
+    shift
+    $COMPOSE run --rm $TTY \
+        -u 1000:1000 \
+        -w /var/www/html \
+        node \
+        vue $@
+}
+
+
+# Simply prints out the commands available to run.
+function usage()
+{
+    echo "Usage: ./dockit [command]"
+    echo
+    echo "Commands:"
+    echo "  npm                         Run npm commands. "
+    echo "  vue                         Run Vue CLI commands. "
+    echo
+    echo "  Optionally to run any docker-compose command just use ./dockit [command] i.e ./dockit ps"
+}
+
+# Catch the command and run it.
+case $1 in
+    (npm)
+        npm $@
+        ;;
+    (vue)
+        vue $@
+        ;;
+    (*)   
+        $COMPOSE $@
+        exit
+        ;;
+esac

@@ -1,0 +1,46 @@
+version: '2'
+
+services:
+  applications:
+    image: tianon/true
+    volumes:
+      - ${APP_PATH}:/var/www/html
+
+  nginx:
+    build:
+      context: ./nginx
+    image: trg/nginx
+    volumes_from:
+      - applications
+    ports:
+      - "${NGINX_HOST_HTTP_PORT}:80"
+    networks:
+      - trg_network
+
+  node:
+    build:
+      context: ./node
+    image: trg/node
+    volumes_from:
+      - applications
+    networks:
+      - trg_network
+
+  python:
+    build:
+      context: ./python
+    image: trg/python
+    volumes:
+      - ${API_PATH}:/usr/src/api
+    ports:
+      - "5000:5000"
+    networks:
+      - trg_network
+
+networks:
+  trg_network:
+    driver: "bridge"
+
+volumes:
+  trg_mariadb_data:
+    driver: "local"
